@@ -52,6 +52,14 @@ class BruteAlgorithm(Algorithm):
 					for z in range(1,10):
 						self.num_map[x][y].append(z)
 
+	def print_num_map(self):
+		tmp = ""
+		for x in range(0,9):
+			for y in range(0,9):
+				tmp += str((x,y)) + " " + str(self.num_map[x][y])
+				tmp += "\n"
+		print(tmp)
+
 	def execute(self, data):
 		puzzle, probabilities = data
 		row = []
