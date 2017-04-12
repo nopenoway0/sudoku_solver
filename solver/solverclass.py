@@ -10,7 +10,7 @@ class SAgent(Agent):
 
 	# simply calls algorithms execute method. Can alter any self variables that we add as well
 	def execute(self, percepts):
-		self.algorithm.execute(percepts)
+		return self.algorithm.execute(percepts)
 
 # class that will contain algorithm to navigate sudoku board. Incoming percepts should be:
 # 	current sudoku puzzle
@@ -52,16 +52,7 @@ class BruteAlgorithm(Algorithm):
 					for z in range(1,10):
 						self.num_map[x][y].append(z)
 
-	def print_num_map(self):
-		tmp = ""
-		for x in range(0,9):
-			for y in range(0,9):
-				tmp += str((x,y)) + " " + str(self.num_map[x][y])
-				tmp += "\n"
-		print(tmp)
-
-	def execute(self, data):
-		puzzle, probabilities = data
+	def update_map(self, puzzle):
 		row = []
 		# Calculate possible numbers based of numbers in row
 		for x in range(0,9):
@@ -100,7 +91,31 @@ class BruteAlgorithm(Algorithm):
 					for z in row:
 						if z in self.num_map[x][y]:
 							self.num_map[x][y].remove(z)
-				#print(test)
+	
+	def print_num_map(self):
+		tmp = ""
+		for x in range(0,9):
+			for y in range(0,9):
+				tmp += str((x,y)) + " " + str(self.num_map[x][y])
+				tmp += "\n"
+		print(tmp)
+
+	# Only supports make a decision if there an array of length 1 e.g. given
+	# Returns the actions to take they are as follows
+	def make_decision(self):
+		for x in range(0,9):
+			for y in range(0,9):
+				if(len(self.num_map[x][y]) == 1):
+					return ("input", (x,y), self.num_map[x][y][0])
+		# Can't make decision
+		return ("none", (0,0), 0)
+
+
+	def execute(self, data):
+		puzzle, probabilities = data
+		self.update_map(puzzle)
+		return self.make_decision()
+
 # class to plug in the sudoku environment
 class SEnvironment(Environment):
 	def __init__(self, agent = None, puzzle = None):
@@ -111,7 +126,13 @@ class SEnvironment(Environment):
 	# One step through simulation. Calls agent's execute and passes in the percepts from the percept
 	# function
 	def step(self):
-		self.agent.execute(self.percepts())
+		action, coordinates, value = self.agent.execute(self.percepts())
+		self.execute(action, coordinates, value)
+
+	def execute(self, action, coordinates, value):
+		print("perform: %s at row: %d column: %d to %d" % (action, coordinates[0], coordinates[1], value))
+		if(action == "input"):
+			self.puzzle.execute("%d-%d %d" % (coordinates[0], coordinates[1], value))
 
 	def percepts(self):
 		#
