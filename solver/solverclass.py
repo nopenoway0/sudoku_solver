@@ -78,7 +78,21 @@ class BruteAlgorithm(Algorithm):
 						self.num_map[x][y].remove(z)
 
 		# Add check for possible numbers based off squares
-
+		for z in range(0,9):
+			test = ""
+			row = []
+			for x in range(0 + z/3 * 3,3 + z/3 * 3):
+				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
+					if(puzzle.visible_p[x][y] > 0 and puzzle.visible_p[x][y] < 10):
+						row.append(puzzle.visible_p[x][y])
+					test += str((x,y))
+					test += " "
+				test += "\n"
+				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
+					for z in row:
+						if z in self.num_map[x][y]:
+							self.num_map[x][y].remove(z)
+				#print(test)
 # class to plug in the sudoku environment
 class SEnvironment(Environment):
 	def __init__(self, agent = None, puzzle = None):
