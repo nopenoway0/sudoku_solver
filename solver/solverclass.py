@@ -80,19 +80,21 @@ class BruteAlgorithm(Algorithm):
 		for z in range(0,9):
 			test = ""
 			row = []
-			for x in range(0 + z/3 * 3,3 + z/3 * 3):
+			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
-					if(puzzle.visible_p[x][y] > 0 and puzzle.visible_p[x][y] < 10):
+					if(puzzle.visible_p[x][y] > 0): #and puzzle.visible_p[x][y] < 10):
 						row.append(puzzle.visible_p[x][y])
-					test += str((x,y))
-					test += " "
-				test += "\n"
+						#test += str((x,y)) + str(puzzle.visible_p[x][y]) + " "
+					#else:
+					#	test += str((x,y)) + "- "
+					#test += "counter, z: " + str(((z%3)*3, z))
+				#test += "\n"
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
-					for z in row:
-						if z in self.num_map[x][y]:
-							self.num_map[x][y].remove(z)
-	
-	def print_num_map(self):
+					for a in row:
+						if a in self.num_map[x][y]:
+							self.num_map[x][y].remove(a)
+			#print(test)
+	def print_nm_map(self):
 		tmp = ""
 		for x in range(0,9):
 			for y in range(0,9):
@@ -106,6 +108,7 @@ class BruteAlgorithm(Algorithm):
 		for x in range(0,9):
 			for y in range(0,9):
 				if(len(self.num_map[x][y]) == 1):
+					print self.num_map[x][y]
 					return ("input", (x,y), self.num_map[x][y][0])
 		# Can't make decision
 		return ("none", (0,0), 0)
