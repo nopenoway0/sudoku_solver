@@ -46,8 +46,8 @@ class BruteAlgorithm(Algorithm):
 			for y in range(0,9):
 				# For numbers given, gives these slots an "infinite cost" to change
 				if(puzzle.visible_p[x][y] > 0):
-					for z in range(0,10):
-						self.num_map[x][y].append(100)
+					for z in range(0,12):
+						self.num_map[x][y].append(100 + z)
 				else:
 					for z in range(1,10):
 						self.num_map[x][y].append(z)
@@ -82,13 +82,15 @@ class BruteAlgorithm(Algorithm):
 			row = []
 			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
-					if(puzzle.visible_p[x][y] > 0): #and puzzle.visible_p[x][y] < 10):
+					if(puzzle.visible_p[x][y] > 0 and puzzle.visible_p[x][y] < 10):
 						row.append(puzzle.visible_p[x][y])
 						#test += str((x,y)) + str(puzzle.visible_p[x][y]) + " "
 					#else:
 					#	test += str((x,y)) + "- "
 					#test += "counter, z: " + str(((z%3)*3, z))
 				#test += "\n"
+			
+			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
 					for a in row:
 						if a in self.num_map[x][y]:
@@ -105,12 +107,20 @@ class BruteAlgorithm(Algorithm):
 	# Only supports make a decision if there an array of length 1 e.g. given
 	# Returns the actions to take they are as follows
 	def make_decision(self):
+		# decision algorithm
+		minimum = 10
+		coordinates = None
 		for x in range(0,9):
+			# for testing it excludes last tile
 			for y in range(0,9):
-				if(len(self.num_map[x][y]) == 1):
-					print self.num_map[x][y]
-					return ("input", (x,y), self.num_map[x][y][0])
-		# Can't make decision
+				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
+					minimum = len(self.num_map[x][y])
+					coordinates = (x,y)
+		if(minimum == 10):
+			return ("done", (0,0), 0)
+		else:
+			print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
+			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0])
 		return ("none", (0,0), 0)
 
 
@@ -130,12 +140,17 @@ class SEnvironment(Environment):
 	# function
 	def step(self):
 		action, coordinates, value = self.agent.execute(self.percepts())
-		self.execute(action, coordinates, value)
+		if(self.execute(action, coordinates, value)):
+			return True
 
 	def execute(self, action, coordinates, value):
 		print("perform: %s at row: %d column: %d to %d" % (action, coordinates[0], coordinates[1], value))
 		if(action == "input"):
 			self.puzzle.execute("%d-%d %d" % (coordinates[0], coordinates[1], value))
+		if(action == "error"):
+			raise Exception("Can't do anything")
+		if(action == "done"):
+			return True
 
 	def percepts(self):
 		#
