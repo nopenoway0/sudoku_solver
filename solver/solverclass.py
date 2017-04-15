@@ -1,16 +1,21 @@
 from templates import *
+import random
+import copy
 # Sudoku Agent
 class SAgent(Agent):
 	def __init__(self, algorithm = None, kb = None):
 		# Algorithm to run for each step of the agent
 		self.algorithm = algorithm
-
+		self.actions = []
 		# Knowledge based. Use PyKe or something else?
 		self.kb = kb
 
 	# simply calls algorithms execute method. Can alter any self variables that we add as well
 	def execute(self, percepts):
-		return self.algorithm.execute(percepts)
+		results = self.algorithm.execute(percepts)
+		self.actions.append(results)
+		return results
+
 
 # class that will contain algorithm to navigate sudoku board. Incoming percepts should be:
 # 	current sudoku puzzle
@@ -32,10 +37,13 @@ class SRuleAlgorithm(Algorithm):
 		# 
 		return (action, coordinates, value)
 
-class BruteAlgorithm(Algorithm):
+class NakedCandidateAlgorithm(Algorithm):
 	def __init__(self, puzzle):
 		self.num_map = []
+		self.reset_puzzle = copy.deepcopy(puzzle) 
+		self.reset()
 
+	def reset(self):
 		for x in range(0,9):
 			self.num_map.append([])
 			for y in range(0,9):
@@ -45,7 +53,7 @@ class BruteAlgorithm(Algorithm):
 		for x in range(0,9):
 			for y in range(0,9):
 				# For numbers given, gives these slots an "infinite cost" to change
-				if(puzzle.visible_p[x][y] > 0):
+				if(self.reset_puzzle.visible_p[x][y] > 0):
 					for z in range(0,12):
 						self.num_map[x][y].append(100 + z)
 				else:
@@ -116,11 +124,15 @@ class BruteAlgorithm(Algorithm):
 				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
 					minimum = len(self.num_map[x][y])
 					coordinates = (x,y)
+		# Random attempt to resolve conflict in puzzle
 		if(minimum == 10):
-			return ("done", (0,0), 0)
+			#return ("done", (0,0), 0)
+			self.reset()
+			# set a random space to 0 and attempt to try again
+			return ("input", (random.randrange(0, 9), random.randrange(0,9)), 0)
 		else:
 			print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
-			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0])
+			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][random.randrange(0, len(self.num_map[coordinates[0]][coordinates[1]]))])
 		return ("none", (0,0), 0)
 
 
