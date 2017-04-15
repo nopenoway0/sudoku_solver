@@ -1,0 +1,5 @@
+Results are across 100 puzzles:
+Naked Candidate with Random conflict resolution:
+	Percent Correct: 41%
+	Runtime = 226.63s
+	Average = 2.27s per puzzle
