@@ -140,50 +140,95 @@ class NakedCandidateAlgorithm(Algorithm):
 	#other cells in square (not implemented)
 	#T3: Pointing Triple (implementation necessary?)
 	def pointing_pairs(self):
-		# check for sharing per row in a square and remove from all others in the row
-		# First square check
-		# 
-		#row count
-		
-		#scans 1 row in 1 square
-		#
-		#
-		row = []
 		# applies algorithm for rows of each square
 		# checks for first 3 squares
-		for p in range(0,1):
+		for p in range(0,3):
+			column = []
 			row = []
 			backup_row = None
+			backup_col = None
 			# get row of all squares
 			for y in range(0,3):
-				row.append(self.num_map[0][p*3 + y])
-				row.append(self.num_map[1][p*3 + y])
-				row.append(self.num_map[2][p*3 + y])
+				if(y == 0):
+					row.append(copy.deepcopy(self.num_map[p/3 * 3 + 0][p*3 + y]))
+					row.append(copy.deepcopy(self.num_map[p/3 * 3 + 1][p*3 + y]))
+					row.append(copy.deepcopy(self.num_map[p/3 * 3 + 2][p*3 + y]))
+				else:
+					row[0] += copy.deepcopy(self.num_map[p/3 * 3 + 0][p*3 + y])
+					row[1] += copy.deepcopy(self.num_map[p/3 * 3 + 1][p*3 + y])
+					row[2] += copy.deepcopy(self.num_map[p/3 * 3 + 1][p*3 + y])
+
+				#raw_input(str((p/3 * 3 + 0, (p%3) * 3 + y)))
+				#raw_input(str((p/3 * 3 + 1, (p%3) * 3 + y)))
+				#raw_input(str((p/3 * 3 + 2, (p%3) * 3 + y)))
+				# Might not work
+				if(y == 0):
+					column.append(copy.deepcopy(self.num_map[p/3 * 3 + 0][(p%3) * 3 + y]))
+					column.append(copy.deepcopy(self.num_map[p/3 * 3 + 1][(p%3) * 3 + y]))
+					column.append(copy.deepcopy(self.num_map[p/3 * 3 + 2][(p%3) * 3 + y]))
+				else:
+					column += copy.deepcopy(self.num_map[p/3 * 3 + 0][(p%3) * 3 + y])
+					column += copy.deepcopy(self.num_map[p/3 * 3 + 1][(p%3) * 3 + y])
+					column += copy.deepcopy(self.num_map[p/3 * 3 + 2][(p%3) * 3 + y])	
+
+			# remove duplicates for testing and legibility
+			for x in range(0,3):
+				row[x] = list(set(row[x]))
+				column[x] = list(set(column[x]))
+
+			#make copies so we don't have to run those loops until the next square
 			backup_row = copy.deepcopy(row)
+			backup_col = copy.deepcopy(column)
 
-			raw_input("backup_row: " + str(backup_row[0]))
+			#print(row[0])
+			#print(row[1])
+			#raw_input(row[2])
 
+			# Fix rows of first square
 			for x in range(0,3):
 				row = copy.deepcopy(backup_row)
-				raw_input("before: " + str(row[x % 3]))
+				column = copy.deepcopy(backup_col)
+				#raw_input("before: " + str(column[x % 3]))
+				# modify row list
 				for candidate in row[(x + 1) % 3]:
 					if candidate in row[x % 3]:
 						row[x % 3].remove(candidate)
-
 				for candidate in row[(x + 2) % 3]:
 					if candidate in row[x % 3]:
 						row[x % 3].remove(candidate)
 
+				# modify column list
+				for candidate in column[(x + 1) % 3]:
+					if candidate in column[x % 3]:
+						column[x % 3].remove(candidate)
+				for candidate in column[(x + 2) % 3]:
+					if candidate in column[x % 3]:
+						column[x % 3].remove(candidate)
+
+				#print(row[0]) 3,5
+				#print(row[1])
+				#print(str((p, x)))
+				#raw_input(row[2])
 			# remove candidates left from row of other squares
-				for y in range(3,9):
-					for candidate in row[x % 3]:
-						if candidate in self.num_map[x % 3][y]:
-							self.num_map[x % 3][y].remove(candidate)
-				raw_input("after: " + str(row[x % 3]))
-		#self.print_nm_map()
-		#raw_input("row0: " + str(row[2]))
-
-
+				for y in range(0,6):
+					count = 0
+					raw_input(str(p) + " " + str((((p%3) * 3 + x) % 9,(p*3 + 3 + y) % 9, x)))
+					for candidate in row[x]:
+						if (candidate > 9):
+							pass
+						else:
+							#check if the candidate only appears once in the row. If so, set it to the square
+							for elem in self.num_map[(p%3) * 3 + x][(p*3 + 3 + y) % 9]:
+								if(candidate == elem):
+									count += 1
+							if(count == 1 and len(row[x]) == 1):
+								raw_input(str(count) + " with cand = " + str(candidate))
+								self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9] = []
+								self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9].append(candidate)
+							# if not remove from the rest of the of the rows
+							else:
+								if candidate in self.num_map[((p%3) * 3 + x)][(p*3 + 3 + y) % 9]:
+									self.num_map[((p%3) * 3 + x)][(p*3 + 3 + y) % 9].remove(candidate)
 
 	def print_nm_map(self):
 		tmp = ""
@@ -214,6 +259,7 @@ class NakedCandidateAlgorithm(Algorithm):
 			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 		else:
 			self.crosshatch()
+			self.print_nm_map()
 			for x in range(0,9):
 			#	# for testing it excludes last tile
 				for y in range(0,9):
