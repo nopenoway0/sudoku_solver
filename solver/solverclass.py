@@ -103,21 +103,32 @@ class NakedCandidateAlgorithm(Algorithm):
 						if a in self.num_map[x][y]:
 							self.num_map[x][y].remove(a)
 
+	# only row is currently implemented. must add column
 	def hidden_candidate(self):
 		for x in range(0,9):
-			counter = []
+			counter_row = []
+			counter_col = []
 			for y in range(0,10):
-				counter.append(0)
+				counter_row.append(0)
+				counter_col.append(0)
 			for y in range(0,9):
 				for z in self.num_map[x][y]:
 					if(z < 10):
-						counter[z] += 1
+						counter_row[z] += 1
+				for z in self.num_map[y][x]:
+					if(z < 10):
+						counter_col[z] += 1
 			for y in range(0,10):
-				if(counter[y] == 1):
+				if(counter_row[y] == 1):
 					for z in range(0,9):
 						if y in self.num_map[x][z]:
 							self.num_map[x][z] = []
 							self.num_map[x][z].append(y)
+				elif(counter_col[y] == 1):
+					for z in range(0,9):
+						if y in self.num_map[z][x]:
+							self.num_map[z][x] = []
+							self.num_map[z][x].append(y)
 
 
 	# scan using crosshatch to determine numbers
@@ -201,7 +212,6 @@ class NakedCandidateAlgorithm(Algorithm):
 			for x in range(0,3):
 				row = copy.deepcopy(backup_row)
 				column = copy.deepcopy(backup_col)
-				#raw_input("before: " + str(column[x % 3]))
 				# modify row list
 				for candidate in row[(x + 1) % 3]:
 					if candidate in row[x % 3]:
@@ -230,8 +240,9 @@ class NakedCandidateAlgorithm(Algorithm):
 								if(candidate == elem):
 									count += 1
 							if(count == 1 and len(row[x]) == 1):
-								self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9] = []
-								self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9].append(candidate)
+								if 100 not in self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9]:
+									self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9] = []
+									self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9].append(candidate)
 							# if not remove from the rest of the of the rows
 							else:
 								if candidate in self.num_map[((p%3) * 3 + x)][(p*3 + 3 + y) % 9]:
