@@ -1,6 +1,8 @@
 from templates import *
 import random
 import copy
+
+
 # Sudoku Agent
 class SAgent(Agent):
 	def __init__(self, algorithm = None, kb = None):
@@ -12,9 +14,14 @@ class SAgent(Agent):
 
 	# simply calls algorithms execute method. Can alter any self variables that we add as well
 	def execute(self, percepts):
-		results = self.algorithm.execute(percepts)
-		self.actions.append(results)
-		return results
+		action, coordinates, value, wild_card = self.algorithm.execute(percepts)
+		if(action == "resolve"):
+			#raw_input(str(results[3]) + "adjusting: to " + str(self.actions))
+			self.actions.remove(wild_card)# = self.actions[:self.actions.index(results[3])]
+			#raw_input(self.actions)
+		else:
+			self.actions.append((action, coordinates, value, wild_card))
+		return (action, coordinates, value, wild_card)
 
 
 # class that will contain algorithm to navigate sudoku board. Incoming percepts should be:
@@ -48,12 +55,12 @@ class NakedCandidateAlgorithm(Algorithm):
 			self.num_map.append([])
 			for y in range(0,9):
 				self.num_map[x].append([])
-				#self.num_map[x][y].append([]) don't think this is needed
 
 		for x in range(0,9):
 			for y in range(0,9):
 				# For numbers given, gives these slots an "infinite cost" to change
 				if(self.reset_puzzle.visible_p[x][y] > 0):
+					self.num_map[x][y] = []
 					for z in range(0,12):
 						self.num_map[x][y].append(100 + z)
 				else:
@@ -86,24 +93,90 @@ class NakedCandidateAlgorithm(Algorithm):
 
 		# Add check for possible numbers based off squares
 		for z in range(0,9):
-			test = ""
 			row = []
 			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
 					if(puzzle.visible_p[x][y] > 0 and puzzle.visible_p[x][y] < 10):
 						row.append(puzzle.visible_p[x][y])
-						#test += str((x,y)) + str(puzzle.visible_p[x][y]) + " "
-					#else:
-					#	test += str((x,y)) + "- "
-					#test += "counter, z: " + str(((z%3)*3, z))
-				#test += "\n"
 			
 			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
 					for a in row:
 						if a in self.num_map[x][y]:
 							self.num_map[x][y].remove(a)
-			#print(test)
+
+	# scan using crosshatch to determine numbers
+	def crosshatch(self):
+		for z in range(0,9):
+			square = []
+			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
+				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
+					square += self.num_map[x][y]
+			# scan through 9 squares and replace the numbers in their map, splice the numbers already present in the checking square
+			# remove it and place into square 2 (not implemented yet)
+			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
+				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
+					square2 = copy.deepcopy(square)
+					for p in self.num_map[x][y]:
+						if p in square2:
+							square2.remove(p)
+					for p in range(0,12):
+						if (100 + p) in square2:
+							square2.remove(100 + p)
+					tmp = copy.deepcopy(self.num_map[x][y])
+					for p in square2:
+						if p in tmp:
+							tmp.remove(p)
+					if(len(tmp) > 0):
+						if 100 in tmp:
+							pass
+						else:
+							self.num_map[x][y] = copy.deepcopy(tmp)
+
+	#from http://www.sudoku-solutions.com/index.php?page=solvingInteractions
+	#implement pointing pairs techinques
+	#T1: if candidate only TWICE is shared in row or column - remove from other cells (not implemented)
+	#T2: if pair of empty cells share candidate AND that candidate does not appear in row or column - remove from all
+	#other cells in square (not implemented)
+	#T3: Pointing Triple (implementation necessary?)
+	def pointing_pairs(self):
+		# check for sharing per row in a square and remove from all others in the row
+		# First square check
+		# 
+		#row count
+		
+		#scans 1 row in 1 square
+		#
+		#
+		row = []
+		# scans the 3 rows of square 1
+		for y in range(0,3):
+			row.append(self.num_map[0][y])
+			row.append(self.num_map[1][y])
+			row.append(self.num_map[2][y])
+
+		for candidate in row[0]:
+			if candidate in row[2]:
+				row[2].remove(candidate)
+
+		for candidate in row[1]:
+			if candidate in row[2]:
+				row[2].remove(candidate)
+
+		for candidate in row[2]:
+			raw_input(candidate)
+
+		# remove candidates left from row of other squares
+		for y in range(3,9):
+			for candidate in row[2]:
+				if candidate in self.num_map[2][y]:
+					self.num_map[2][y].remove(candidate)
+		# end of 1 row scan
+		self.print_nm_map()
+		raw_input("row0: " + str(row[2]))
+
+
+
 	def print_nm_map(self):
 		tmp = ""
 		for x in range(0,9):
@@ -114,32 +187,45 @@ class NakedCandidateAlgorithm(Algorithm):
 
 	# Only supports make a decision if there an array of length 1 e.g. given
 	# Returns the actions to take they are as follows
-	def make_decision(self):
+	def make_decision(self, action_map):
 		# decision algorithm
 		minimum = 10
 		coordinates = None
+		#self.crosshatch()
 		for x in range(0,9):
-			# for testing it excludes last tile
+		#	# for testing it excludes last tile
 			for y in range(0,9):
-				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
+				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) <= minimum):
 					minimum = len(self.num_map[x][y])
 					coordinates = (x,y)
-		# Random attempt to resolve conflict in puzzle
+		# no possible moves
 		if(minimum == 10):
-			#return ("done", (0,0), 0)
-			self.reset()
-			# set a random space to 0 and attempt to try again
-			return ("input", (random.randrange(0, 9), random.randrange(0,9)), 0)
-		else:
+			return ("none", (0,0),0, 0)
+		elif(minimum == 1):
 			print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
-			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][random.randrange(0, len(self.num_map[coordinates[0]][coordinates[1]]))])
-		return ("none", (0,0), 0)
+			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
+		else:
+			self.crosshatch()
+			for x in range(0,9):
+			#	# for testing it excludes last tile
+				for y in range(0,9):
+					if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
+						minimum = len(self.num_map[x][y])
+						coordinates = (x,y)
+			if(minimum == 1):
+				return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
+			else:
+				self.pointing_pairs()
+				self.print_nm_map()
+				raw_input("ran pointing pairs")
+				return ("none", (0,0), 0, 0)
+		return ("none", (0,0), 0, 0)
 
 
 	def execute(self, data):
-		puzzle, probabilities = data
+		puzzle, action_map = data
 		self.update_map(puzzle)
-		return self.make_decision()
+		return self.make_decision(action_map)
 
 # class to plug in the sudoku environment
 class SEnvironment(Environment):
@@ -151,7 +237,7 @@ class SEnvironment(Environment):
 	# One step through simulation. Calls agent's execute and passes in the percepts from the percept
 	# function
 	def step(self):
-		action, coordinates, value = self.agent.execute(self.percepts())
+		action, coordinates, value, probabilities = self.agent.execute(self.percepts())
 		if(self.execute(action, coordinates, value)):
 			return True
 
@@ -168,6 +254,6 @@ class SEnvironment(Environment):
 		#
 		# Calculate probabilities based on previous experiences
 		#
-		probabilities = 0
+		probabilities = self.agent.actions
 
 		return (self.puzzle, probabilities)
