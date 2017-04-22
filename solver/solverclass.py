@@ -16,9 +16,7 @@ class SAgent(Agent):
 	def execute(self, percepts):
 		action, coordinates, value, wild_card = self.algorithm.execute(percepts)
 		if(action == "resolve"):
-			#raw_input(str(results[3]) + "adjusting: to " + str(self.actions))
-			self.actions.remove(wild_card)# = self.actions[:self.actions.index(results[3])]
-			#raw_input(self.actions)
+			self.actions.remove(wild_card)
 		else:
 			self.actions.append((action, coordinates, value, wild_card))
 		return (action, coordinates, value, wild_card)
@@ -105,6 +103,23 @@ class NakedCandidateAlgorithm(Algorithm):
 						if a in self.num_map[x][y]:
 							self.num_map[x][y].remove(a)
 
+	def hidden_candidate(self):
+		for x in range(0,9):
+			counter = []
+			for y in range(0,10):
+				counter.append(0)
+			for y in range(0,9):
+				for z in self.num_map[x][y]:
+					if(z < 10):
+						counter[z] += 1
+			for y in range(0,10):
+				if(counter[y] == 1):
+					for z in range(0,9):
+						if y in self.num_map[x][z]:
+							self.num_map[x][z] = []
+							self.num_map[x][z].append(y)
+
+
 	# scan using crosshatch to determine numbers
 	def crosshatch(self):
 		for z in range(0,9):
@@ -158,31 +173,29 @@ class NakedCandidateAlgorithm(Algorithm):
 					row[1] += copy.deepcopy(self.num_map[p/3 * 3 + 1][p*3 + y])
 					row[2] += copy.deepcopy(self.num_map[p/3 * 3 + 1][p*3 + y])
 
-				#raw_input(str((p/3 * 3 + 0, (p%3) * 3 + y)))
-				#raw_input(str((p/3 * 3 + 1, (p%3) * 3 + y)))
-				#raw_input(str((p/3 * 3 + 2, (p%3) * 3 + y)))
-				# Might not work
 				if(y == 0):
-					column.append(copy.deepcopy(self.num_map[p/3 * 3 + 0][(p%3) * 3 + y]))
-					column.append(copy.deepcopy(self.num_map[p/3 * 3 + 1][(p%3) * 3 + y]))
-					column.append(copy.deepcopy(self.num_map[p/3 * 3 + 2][(p%3) * 3 + y]))
+					column.append(copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 0]))
+					column.append(copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 1]))
+					column.append(copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 2]))
 				else:
-					column += copy.deepcopy(self.num_map[p/3 * 3 + 0][(p%3) * 3 + y])
-					column += copy.deepcopy(self.num_map[p/3 * 3 + 1][(p%3) * 3 + y])
-					column += copy.deepcopy(self.num_map[p/3 * 3 + 2][(p%3) * 3 + y])	
+					column[0] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 0])
+					column[1] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 1])
+					column[2] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 2])	
 
 			# remove duplicates for testing and legibility
 			for x in range(0,3):
 				row[x] = list(set(row[x]))
+				for z in range(0,10):
+					if (z + 100) in row[x]:
+						row[x].remove(z + 100)
+					if (z + 100) in column[x]:
+						column[x].remove(z + 100)
 				column[x] = list(set(column[x]))
 
 			#make copies so we don't have to run those loops until the next square
 			backup_row = copy.deepcopy(row)
 			backup_col = copy.deepcopy(column)
 
-			#print(row[0])
-			#print(row[1])
-			#raw_input(row[2])
 
 			# Fix rows of first square
 			for x in range(0,3):
@@ -205,14 +218,9 @@ class NakedCandidateAlgorithm(Algorithm):
 					if candidate in column[x % 3]:
 						column[x % 3].remove(candidate)
 
-				#print(row[0]) 3,5
-				#print(row[1])
-				#print(str((p, x)))
-				#raw_input(row[2])
 			# remove candidates left from row of other squares
 				for y in range(0,6):
 					count = 0
-					raw_input(str(p) + " " + str((((p%3) * 3 + x) % 9,(p*3 + 3 + y) % 9, x)))
 					for candidate in row[x]:
 						if (candidate > 9):
 							pass
@@ -222,13 +230,32 @@ class NakedCandidateAlgorithm(Algorithm):
 								if(candidate == elem):
 									count += 1
 							if(count == 1 and len(row[x]) == 1):
-								raw_input(str(count) + " with cand = " + str(candidate))
 								self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9] = []
 								self.num_map[((p%3) * 3 + x)][(p*3 + y) % 9].append(candidate)
 							# if not remove from the rest of the of the rows
 							else:
 								if candidate in self.num_map[((p%3) * 3 + x)][(p*3 + 3 + y) % 9]:
 									self.num_map[((p%3) * 3 + x)][(p*3 + 3 + y) % 9].remove(candidate)
+
+					#do the same for columns. Not reducing candidates currently
+					count = 0
+					for candidate in column[x]:
+						if (candidate > 9):
+							pass#raw_input("can't remove " + str(candidate) + " from square" + str(p) + " at " + str(((p*3 + 3 + y) % 9, ((p%3) * 3 + x))))
+						else:
+							#check if the candidate only appears once in the column. If so, set it to the square
+							for elem in self.num_map[(p*3 + 3 + y) % 9][(p%3) * 3 + x]:
+								if(candidate == elem):
+									count += 1
+							if(count == 1 and len(column[x]) == 1):
+								pass
+								#self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)] = []
+								#self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)].append(candidate)
+							# if not remove from the rest of the of the columns
+							else:
+								if candidate in self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)]:
+									if (len(self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)]) > 1):
+										pass#self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)].remove(candidate)
 
 	def print_nm_map(self):
 		tmp = ""
@@ -253,12 +280,15 @@ class NakedCandidateAlgorithm(Algorithm):
 					coordinates = (x,y)
 		# no possible moves
 		if(minimum == 10):
-			return ("none", (0,0),0, 0)
+			return ("done", (0,0),0, 0)
 		elif(minimum == 1):
 			print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
 			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 		else:
 			self.crosshatch()
+			self.print_nm_map()
+			self.pointing_pairs()
+			self.hidden_candidate()
 			self.print_nm_map()
 			for x in range(0,9):
 			#	# for testing it excludes last tile
@@ -269,10 +299,8 @@ class NakedCandidateAlgorithm(Algorithm):
 			if(minimum == 1):
 				return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 			else:
-				self.pointing_pairs()
-				self.print_nm_map()
 				#raw_input("ran pointing pairs")
-				return ("none", (0,0), 0, 0)
+				return ("done", (0,0), 0, 0)
 		return ("none", (0,0), 0, 0)
 
 
