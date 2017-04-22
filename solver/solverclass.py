@@ -297,10 +297,9 @@ class NakedCandidateAlgorithm(Algorithm):
 			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 		else:
 			self.crosshatch()
-			self.print_nm_map()
 			self.pointing_pairs()
 			self.hidden_candidate()
-			self.print_nm_map()
+			#self.print_nm_map()
 			for x in range(0,9):
 			#	# for testing it excludes last tile
 				for y in range(0,9):
