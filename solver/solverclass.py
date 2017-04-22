@@ -149,31 +149,39 @@ class NakedCandidateAlgorithm(Algorithm):
 		#
 		#
 		row = []
-		# scans the 3 rows of square 1
-		for y in range(0,3):
-			row.append(self.num_map[0][y])
-			row.append(self.num_map[1][y])
-			row.append(self.num_map[2][y])
+		# applies algorithm for rows of each square
+		# checks for first 3 squares
+		for p in range(0,1):
+			row = []
+			backup_row = None
+			# get row of all squares
+			for y in range(0,3):
+				row.append(self.num_map[0][p*3 + y])
+				row.append(self.num_map[1][p*3 + y])
+				row.append(self.num_map[2][p*3 + y])
+			backup_row = copy.deepcopy(row)
 
-		for candidate in row[0]:
-			if candidate in row[2]:
-				row[2].remove(candidate)
+			raw_input("backup_row: " + str(backup_row[0]))
 
-		for candidate in row[1]:
-			if candidate in row[2]:
-				row[2].remove(candidate)
+			for x in range(0,3):
+				row = copy.deepcopy(backup_row)
+				raw_input("before: " + str(row[x % 3]))
+				for candidate in row[(x + 1) % 3]:
+					if candidate in row[x % 3]:
+						row[x % 3].remove(candidate)
 
-		for candidate in row[2]:
-			raw_input(candidate)
+				for candidate in row[(x + 2) % 3]:
+					if candidate in row[x % 3]:
+						row[x % 3].remove(candidate)
 
-		# remove candidates left from row of other squares
-		for y in range(3,9):
-			for candidate in row[2]:
-				if candidate in self.num_map[2][y]:
-					self.num_map[2][y].remove(candidate)
-		# end of 1 row scan
-		self.print_nm_map()
-		raw_input("row0: " + str(row[2]))
+			# remove candidates left from row of other squares
+				for y in range(3,9):
+					for candidate in row[x % 3]:
+						if candidate in self.num_map[x % 3][y]:
+							self.num_map[x % 3][y].remove(candidate)
+				raw_input("after: " + str(row[x % 3]))
+		#self.print_nm_map()
+		#raw_input("row0: " + str(row[2]))
 
 
 
@@ -217,7 +225,7 @@ class NakedCandidateAlgorithm(Algorithm):
 			else:
 				self.pointing_pairs()
 				self.print_nm_map()
-				raw_input("ran pointing pairs")
+				#raw_input("ran pointing pairs")
 				return ("none", (0,0), 0, 0)
 		return ("none", (0,0), 0, 0)
 
