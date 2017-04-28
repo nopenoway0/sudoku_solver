@@ -2,7 +2,6 @@ from templates import *
 import random
 import copy
 
-
 # Sudoku Agent
 class SAgent(Agent):
 	def __init__(self, algorithm = None, kb = None):
@@ -20,7 +19,6 @@ class SAgent(Agent):
 		else:
 			self.actions.append((action, coordinates, value, wild_card))
 		return (action, coordinates, value, wild_card)
-
 
 # class that will contain algorithm to navigate sudoku board. Incoming percepts should be:
 # 	current sudoku puzzle
@@ -47,6 +45,7 @@ class NakedCandidateAlgorithm(Algorithm):
 		self.num_map = []
 		self.reset_puzzle = copy.deepcopy(puzzle) 
 		self.reset()
+		# can store stack here and use it for back tracking possibly
 
 	def reset(self):
 		for x in range(0,9):
@@ -159,6 +158,7 @@ class NakedCandidateAlgorithm(Algorithm):
 						else:
 							self.num_map[x][y] = copy.deepcopy(tmp)
 
+	# Learning + Backtracking will replace this
 	#from http://www.sudoku-solutions.com/index.php?page=solvingInteractions
 	#implement pointing pairs techinques
 	#T1: if candidate only TWICE is shared in row or column - remove from other cells (not implemented)
@@ -260,14 +260,14 @@ class NakedCandidateAlgorithm(Algorithm):
 									count += 1
 							if(count == 1 and len(column[x]) == 1):
 								pass
-								#self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)] = []
-								#self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)].append(candidate)
+
 							# if not remove from the rest of the of the columns
 							else:
 								if candidate in self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)]:
 									if (len(self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)]) > 1):
-										pass#self.num_map[(p*3 + y) % 9][((p%3) * 3 + x)].remove(candidate)
+										pass
 
+	# Prints the array of containing all current candidates for each cell
 	def print_nm_map(self):
 		tmp = ""
 		for x in range(0,9):
@@ -282,9 +282,8 @@ class NakedCandidateAlgorithm(Algorithm):
 		# decision algorithm
 		minimum = 10
 		coordinates = None
-		#self.crosshatch()
+		# scan for a cell that has only 1 possible candidate
 		for x in range(0,9):
-		#	# for testing it excludes last tile
 			for y in range(0,9):
 				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) <= minimum):
 					minimum = len(self.num_map[x][y])
@@ -293,13 +292,12 @@ class NakedCandidateAlgorithm(Algorithm):
 		if(minimum == 10):
 			return ("done", (0,0),0, 0)
 		elif(minimum == 1):
-			print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
+			#print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
 			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 		else:
 			self.crosshatch()
-			self.pointing_pairs()
+			#self.pointing_pairs() - don't use
 			self.hidden_candidate()
-			#self.print_nm_map()
 			for x in range(0,9):
 			#	# for testing it excludes last tile
 				for y in range(0,9):
@@ -309,7 +307,6 @@ class NakedCandidateAlgorithm(Algorithm):
 			if(minimum == 1):
 				return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 			else:
-				#raw_input("ran pointing pairs")
 				return ("done", (0,0), 0, 0)
 		return ("none", (0,0), 0, 0)
 
