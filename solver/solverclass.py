@@ -31,21 +31,23 @@ class SRuleAlgorithm(Algorithm):
 		# error, the algorithm failed
 		# Coordinates are the grid affect and the value is what the grid will be changed
 		# into
-		
+
 		# Place holder
 		puzzle, probabilities = percepts
 		action, coordinates, value = (None, (0,0), 0)
 		# Algorithm goes here
-		# 
-		# 
+		#
+		#
 		return (action, coordinates, value)
 
 class NakedCandidateAlgorithm(Algorithm):
 	def __init__(self, puzzle):
 		self.num_map = []
-		self.reset_puzzle = copy.deepcopy(puzzle) 
+		self.reset_puzzle = copy.deepcopy(puzzle)
 		self.reset()
-		# can store stack here and use it for back tracking possibly
+
+		# can store stack here and use it for back tracking possibly - DONE
+		self.movesStack = []
 
 	def reset(self):
 		for x in range(0,9):
@@ -95,7 +97,7 @@ class NakedCandidateAlgorithm(Algorithm):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
 					if(puzzle.visible_p[x][y] > 0 and puzzle.visible_p[x][y] < 10):
 						row.append(puzzle.visible_p[x][y])
-			
+
 			for x in range(0 + (z/3 * 3),3 + (z/3 * 3)):
 				for y in range(0 + (z%3) * 3,3 + (z%3) * 3):
 					for a in row:
@@ -158,6 +160,44 @@ class NakedCandidateAlgorithm(Algorithm):
 						else:
 							self.num_map[x][y] = copy.deepcopy(tmp)
 
+
+	#my idea for backtracking
+	#functions to create: backtrack, checkValiditiy
+	#
+	#We store the coordinates from make_decision into list
+	#
+	#Each time make_decision makes a decision, we checkValidity to see if
+	#move is valid
+	#If Move is not valid, we call backTracking to blank out last move
+	#
+	#todo: confirm on where to checkValidity and backTrack inside make_decision
+	#      backtrack/checkValidity are probably broken...
+
+	def backtrack(self):
+		toPop = movesStack.pop()
+		num_stack.remove(topPop)
+
+	def checkValidity(self):
+		n = len(num_map)
+		digit = 1
+		while digit <= n:
+			i = 0
+			while i < n:
+				row_count = 0
+				col_count = 0
+				j = 0
+				while j < n:
+					if num_map[i][j] == digit:
+						row_count = row_count + 1
+					if num_map[j][i] == digit:
+						col_count = col_count + 1
+					j = j + 1
+				if row_count != 1 or col_count != 1:
+					return False
+				i = i + 1
+			digit  = digit + 1
+		return True
+
 	# Learning + Backtracking will replace this
 	#from http://www.sudoku-solutions.com/index.php?page=solvingInteractions
 	#implement pointing pairs techinques
@@ -191,7 +231,7 @@ class NakedCandidateAlgorithm(Algorithm):
 				else:
 					column[0] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 0])
 					column[1] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 1])
-					column[2] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 2])	
+					column[2] += copy.deepcopy(self.num_map[(p%3) * 3 + y][p/3 * 3 + 2])
 
 			# remove duplicates for testing and legibility
 			for x in range(0,3):
@@ -288,6 +328,7 @@ class NakedCandidateAlgorithm(Algorithm):
 				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) <= minimum):
 					minimum = len(self.num_map[x][y])
 					coordinates = (x,y)
+					#movesStack.append(coordinates)   -- not sure on this one
 		# no possible moves
 		if(minimum == 10):
 			return ("done", (0,0),0, 0)
@@ -304,6 +345,7 @@ class NakedCandidateAlgorithm(Algorithm):
 					if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
 						minimum = len(self.num_map[x][y])
 						coordinates = (x,y)
+						#movesStack.append(coordinates)  -- not sure on this one
 			if(minimum == 1):
 				return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 			else:
