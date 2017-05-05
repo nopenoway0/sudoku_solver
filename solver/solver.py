@@ -46,3 +46,4 @@ for z in range(0, len(puzzle_list)):
 		#	raw_input("imperfect score on puzzle: " + str(z) + " perc " + str(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0))
 end = time.time()
 print("Time taken to solve %d puzzles: %.2fs\nCorrect percentage %.2f\nPercentage of puzzles solved %d/%s" % (len(puzzle_list) / 2, end - start, percentage, puzzles_solved, len(puzzle_list) / 2))
+#made a comment
