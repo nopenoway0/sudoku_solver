@@ -174,8 +174,12 @@ class NakedCandidateAlgorithm(Algorithm):
 	#      backtrack/checkValidity are probably broken...
 
 	def backtrack(self):
-		toPop = movesStack.pop()
-		num_stack.remove(topPop)
+		recentMove = movesStack.pop()
+		x = recentMove.x
+		y = recentMove.y
+		return recentMove
+
+
 
 	def checkValidity(self):
 		n = len(num_map)
@@ -264,8 +268,6 @@ class NakedCandidateAlgorithm(Algorithm):
 				for candidate in column[(x + 1) % 3]:
 					if candidate in column[x % 3]:
 						column[x % 3].remove(candidate)
-				for candidate in column[(x + 2) % 3]:
-					if candidate in column[x % 3]:
 						column[x % 3].remove(candidate)
 
 			# remove candidates left from row of other squares
@@ -328,7 +330,7 @@ class NakedCandidateAlgorithm(Algorithm):
 				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) <= minimum):
 					minimum = len(self.num_map[x][y])
 					coordinates = (x,y)
-					#movesStack.append(coordinates)   -- not sure on this one
+					#movesStack.append(coordinates) - dunno
 		# no possible moves
 		if(minimum == 10):
 			return ("done", (0,0),0, 0)
@@ -345,11 +347,23 @@ class NakedCandidateAlgorithm(Algorithm):
 					if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
 						minimum = len(self.num_map[x][y])
 						coordinates = (x,y)
-						#movesStack.append(coordinates)  -- not sure on this one
+
 			if(minimum == 1):
-				return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
+				valueIn = self.num_map[coordinates[0]][coordinates[1]][0]
+				self.movesStack.append(coordinates)
+				return ("input", coordinates, valueIn, 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 			else:
-				return ("done", (0,0), 0, 0)
+				#call backtrack here
+				#self.backtrack
+				if(len(self.movesStack) == 0):
+					return ("done", (0,0), 0, 0)
+				else:
+					coordinates = self.movesStack.pop()
+
+				valueIn = 1
+				return ("input", coordinates, valueIn, 1.0)
+
+                #return ("done", (0,0), 0, 0)
 		return ("none", (0,0), 0, 0)
 
 

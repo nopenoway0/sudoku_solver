@@ -22,6 +22,9 @@ env = sc.SEnvironment(agent, puzzle)
 percentage = 0
 puzzles_solved = 0
 start = time.time()
+
+#need to add loop to call backtrack then bens algo again.
+#keep checking until solved
 for z in range(0, len(puzzle_list)):
 	if(z % 2 == 0):
 		pass
@@ -31,18 +34,23 @@ for z in range(0, len(puzzle_list)):
 		agent = sc.SAgent(sc.NakedCandidateAlgorithm(puzzle))
 		env = sc.SEnvironment(agent, puzzle)
 		for x in range(0, step_count):
-			os.system("clear")
+			#os.system("clear")
 			if(env.step()):
 				break
 			print(env.puzzle)
 			print("Current percentage: %.2f" % (percentage))
 			#time.sleep(1)
-		agent.algorithm.crosshatch()
-		#print(env.puzzle)
-		percentage += creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0
+        	#time.sleep(0.01)
+	        agent.algorithm.crosshatch()
+	    	#print(env.puzzle)
+
+		percentage += creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1]) / 81.0
 		if(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0 == 1.0):
-			puzzles_solved += 1
-		#if(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0 < 1.0):
+		    puzzles_solved += 1
+        #else:
+			#print(env.puzzle)
+			#print(puzzle_list[z-1])
+        #if(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0 < 1.0):
 		#	raw_input("imperfect score on puzzle: " + str(z) + " perc " + str(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0))
 end = time.time()
 print("Time taken to solve %d puzzles: %.2fs\nCorrect percentage %.2f\nPercentage of puzzles solved %d/%s" % (len(puzzle_list) / 2, end - start, percentage, puzzles_solved, len(puzzle_list) / 2))
