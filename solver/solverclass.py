@@ -175,11 +175,11 @@ class NakedCandidateAlgorithm(Algorithm):
 	#todo: confirm on where to checkValidity and backTrack inside make_decision
 	#      backtrack/checkValidity are probably broken...
 
-	def backtrack(self):
-		recentMove = movesStack.pop()
-		x = recentMove.x
-		y = recentMove.y
-		return recentMove
+	#def backtrack(self):
+	#	recentMove = movesStack.pop()
+	#	x = recentMove.x
+	#	y = recentMove.y
+	#	return recentMove
 
 
 
@@ -333,12 +333,13 @@ class NakedCandidateAlgorithm(Algorithm):
 				if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) <= minimum):
 					minimum = len(self.num_map[x][y])
 					coordinates = (x,y)
-					#movesStack.append(coordinates) - dunno
 		# no possible moves
 		if(minimum == 10):
 			return ("done", (0,0),0, 0)
+
 		elif(minimum == 1):
 			#print("Possibilites: " + str(minimum) + " " + str(self.num_map[coordinates[0]][coordinates[1]]))
+			self.movesStack.append(coordinates)
 			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 		else:
 			self.crosshatch()
@@ -361,24 +362,25 @@ class NakedCandidateAlgorithm(Algorithm):
 
 
 				if (self.backTrackCount == 0):
-					self.pivot = self.movesStack[-1]
-					print("pivot")
-					print(self.pivot)
+					self.pivot = self.movesStack[len(self.movesStack) - 1]
+
 					self.backTrackCount += 1
 
 				self.movesStack.append(coordinates)
+				print self.movesStack
 
 				if (self.movesStack[len(self.movesStack) - 1] != self.pivot):
 					self.movesStack.pop()
 					print(len(self.movesStack))
 					print self.movesStack
-					
-					while (self.movesStack[-1] != self.pivot):
-						#self.movesStack.pop()
-						backTrackCord = self.movesStack.pop()
-						return ("backtrack", backTrackCord, 0, 1.0)
 
+					print("pivot")
+					print(self.pivot)
 
+					while (self.movesStack[len(self.movesStack) - 1] != self.pivot):
+						self.movesStack.pop()
+						#backTrackCord = self.movesStack.pop()
+						return ("backtrack1",self.movesStack[len(self.movesStack) - 1] , 0, 1.0)
 
 				if(len(self.movesStack) == 0):
 
