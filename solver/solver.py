@@ -47,7 +47,7 @@ for z in range(0, len(puzzle_list)):
 		percentage += creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1]) / 81.0
 		if(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0 == 1.0):
 		    puzzles_solved += 1
-        #else:
+		#else:
 			#print(env.puzzle)
 			#print(puzzle_list[z-1])
         #if(creator.Sudoku.compare_with_solution(puzzle, puzzle_list[z - 1])/ 81.0 < 1.0):

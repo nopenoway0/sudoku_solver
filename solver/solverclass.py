@@ -48,6 +48,8 @@ class NakedCandidateAlgorithm(Algorithm):
 
 		# can store stack here and use it for back tracking possibly - DONE
 		self.movesStack = []
+		self.pivot = (0,0)
+		self.backTrackCount = 0
 
 	def reset(self):
 		for x in range(0,9):
@@ -322,6 +324,7 @@ class NakedCandidateAlgorithm(Algorithm):
 	# Returns the actions to take they are as follows
 	def make_decision(self, action_map):
 		# decision algorithm
+		puzzle, prob = action_map
 		minimum = 10
 		coordinates = None
 		# scan for a cell that has only 1 possible candidate
@@ -354,13 +357,54 @@ class NakedCandidateAlgorithm(Algorithm):
 				return ("input", coordinates, valueIn, 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 			else:
 				#call backtrack here
-				#self.backtrack
-				if(len(self.movesStack) == 0):
-					return ("done", (0,0), 0, 0)
-				else:
-					coordinates = self.movesStack.pop()
+				#valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
 
-				valueIn = 1
+
+				if (self.backTrackCount == 0):
+					self.pivot = self.movesStack[-1]
+					print("pivot")
+					print(self.pivot)
+					self.backTrackCount += 1
+
+				self.movesStack.append(coordinates)
+
+				if (self.movesStack[len(self.movesStack) - 1] != self.pivot):
+					self.movesStack.pop()
+					print(len(self.movesStack))
+					print self.movesStack
+					
+					while (self.movesStack[-1] != self.pivot):
+						#self.movesStack.pop()
+						backTrackCord = self.movesStack.pop()
+						return ("backtrack", backTrackCord, 0, 1.0)
+
+
+
+				if(len(self.movesStack) == 0):
+
+					valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
+
+					print("value in")
+					print(valueIn)
+
+					if (valueIn < 0):
+					 	valueIn = 1
+
+					if (valueIn == 9):
+						valueIn = 1
+					else:
+						valueIn += 1
+
+					return ("input", coordinates, valueIn, 1.0)
+				else:
+					coordinates = self.pivot
+
+				valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
+				if (valueIn == 9):
+					valueIn = 1
+				else:
+					valueIn = valueIn + 1
+
 				return ("input", coordinates, valueIn, 1.0)
 
                 #return ("done", (0,0), 0, 0)
@@ -370,7 +414,7 @@ class NakedCandidateAlgorithm(Algorithm):
 	def execute(self, data):
 		puzzle, action_map = data
 		self.update_map(puzzle)
-		return self.make_decision(action_map)
+		return self.make_decision(data)
 
 # class to plug in the sudoku environment
 class SEnvironment(Environment):
