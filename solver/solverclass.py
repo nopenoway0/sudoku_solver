@@ -380,7 +380,8 @@ class NakedCandidateAlgorithm(Algorithm):
 					while (self.movesStack[len(self.movesStack) - 1] != self.pivot):
 						self.movesStack.pop()
 						#backTrackCord = self.movesStack.pop()
-						return ("backtrack1",self.movesStack[len(self.movesStack) - 1] , 0, 1.0)
+						print("backtrack1")
+						return ("input",self.movesStack[len(self.movesStack) - 1] , 0, 1.0)
 
 				if(len(self.movesStack) == 0):
 
