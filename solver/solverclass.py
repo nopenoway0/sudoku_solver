@@ -342,74 +342,74 @@ class NakedCandidateAlgorithm(Algorithm):
 			self.movesStack.append(coordinates)
 			return ("input", coordinates, self.num_map[coordinates[0]][coordinates[1]][0], 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
 		else:
-			#self.crosshatch()
-			#self.hidden_candidate()
-			#for x in range(0,9):
+			self.crosshatch()
+			#self.pointing_pairs() - don't use
+			self.hidden_candidate()
+			for x in range(0,9):
 			#	# for testing it excludes last tile
-			#	for y in range(0,9):
-			#		if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
-			#			minimum = len(self.num_map[x][y])
-			#			coordinates = (x,y)
+				for y in range(0,9):
+					if(len(self.num_map[x][y]) > 0 and len(self.num_map[x][y]) < minimum):
+						minimum = len(self.num_map[x][y])
+						coordinates = (x,y)
 
-			#if(minimum == 1):
-			#	valueIn = self.num_map[coordinates[0]][coordinates[1]][0]
-			#	self.movesStack.append(coordinates)
-			#	return ("input", coordinates, valueIn, 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
-			#else:
+			if(minimum == 1):
+				valueIn = self.num_map[coordinates[0]][coordinates[1]][0]
+				self.movesStack.append(coordinates)
+				return ("input", coordinates, valueIn, 1.0 / len(self.num_map[coordinates[0]][coordinates[1]]))
+			else:
 				#call backtrack here
 				#valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
 
-			self.movesStack.append(coordinates)
-			if (self.backTrackCount == 0):
-				self.pivot = self.movesStack[len(self.movesStack) - 1]
 
-				self.backTrackCount += 1
+				if (self.backTrackCount == 0):
+					self.pivot = self.movesStack[len(self.movesStack) - 1]
 
-			#self.movesStack.append(coordinates)
-			print self.movesStack
+					self.backTrackCount += 1
 
-			if (self.movesStack[len(self.movesStack) - 1] != self.pivot):
-				self.movesStack.pop()
-				print(len(self.movesStack))
+				self.movesStack.append(coordinates)
 				print self.movesStack
 
-				print("pivot")
-				print(self.pivot)
-
-				while (self.movesStack[len(self.movesStack) - 1] != self.pivot):
+				if (self.movesStack[len(self.movesStack) - 1] != self.pivot):
 					self.movesStack.pop()
-					#backTrackCord = self.movesStack.pop()
-					print("backtrack1")
-					return ("input",self.movesStack[len(self.movesStack) - 1] , 0, 1.0)
+					print(len(self.movesStack))
+					print self.movesStack
 
-			if(len(self.movesStack) == 0):
+					print("pivot")
+					print(self.pivot)
+
+					while (self.movesStack[len(self.movesStack) - 1] != self.pivot):
+						self.movesStack.pop()
+						#backTrackCord = self.movesStack.pop()
+						return ("backtrack1",self.movesStack[len(self.movesStack) - 1] , 0, 1.0)
+
+				if(len(self.movesStack) == 0):
+
+					valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
+
+					print("value in")
+					print(valueIn)
+
+					if (valueIn < 0):
+					 	valueIn = 1
+
+					if (valueIn == 9):
+						valueIn = 1
+					else:
+						valueIn += 1
+
+					return ("input", coordinates, valueIn, 1.0)
+				else:
+					coordinates = self.pivot
 
 				valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
-
-				print("value in")
-				print(valueIn)
-
-				if (valueIn < 0):
-				 	valueIn = 1
-
 				if (valueIn == 9):
 					valueIn = 1
 				else:
-					valueIn += 1
+					valueIn = valueIn + 1
 
 				return ("input", coordinates, valueIn, 1.0)
-			else:
-				coordinates = self.pivot
 
-			valueIn = puzzle.visible_p[coordinates[0]][coordinates[1]]
-			if (valueIn == 9):
-				valueIn = 1
-			else:
-				valueIn = valueIn + 1
-
-			return ("input", coordinates, valueIn, 1.0)
-
-            #return ("done", (0,0), 0, 0)
+                #return ("done", (0,0), 0, 0)
 		return ("none", (0,0), 0, 0)
 
 
