@@ -219,8 +219,7 @@ class NakedCandidateAlgorithm(Algorithm):
             	        	guess_attempt = candidate[i]
             	if(guess_attempt != self.ValueIn):
               		candidate_score[self.ValueIn] -= 100
-            	else:
-                	candidate_score[guess_attempt] += 50
+                candidate_score[guess_attempt] += 50
             	return guess_attempt
 	
 	# Learning + Backtracking will replace this
