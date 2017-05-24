@@ -177,6 +177,11 @@ class NakedCandidateAlgorithm(Algorithm):
 		recentMove = movesStack.pop()
 		x = recentMove.x
 		y = recentMove.y
+		#####
+		#remove recent candidate from list
+		self.num_map[x][y].remove(recentMove)
+		new_guess = Candidate_Prediction
+		#####
 		return recentMove
 
 
@@ -201,7 +206,22 @@ class NakedCandidateAlgorithm(Algorithm):
 				i = i + 1
 			digit  = digit + 1
 		return True
-
+	
+	#this is made with assumption that false candidate is removed in backtrack
+        #call method if two or more candidates are called 
+        def Candidate_Prediction(self):
+        	candidate = self.num_map[x][y]
+        	guess_attempt_value = 0
+        	#compare values
+            	for i in len(candidates):
+                	if(guess_attempt_value < candidate_score[candidate[i]]):
+           	         	guess_attempt = candidate[i]
+		if(guess_attempt != recentMove):
+                	candidate_score[recentMove] -= 100
+            	else:
+               		candidate_score[guess_attempt] += 50
+            	return guess_attempt
+	
 	# Learning + Backtracking will replace this
 	#from http://www.sudoku-solutions.com/index.php?page=solvingInteractions
 	#implement pointing pairs techinques
