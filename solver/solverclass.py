@@ -179,8 +179,8 @@ class NakedCandidateAlgorithm(Algorithm):
 		y = recentMove.y
 		#####
 		#remove recent candidate from list
-		self.num_map[x][y].remove(recentMove)
-		new_guess = Candidate_Prediction
+		#self.num_map[x][y].remove(recentMove)
+		#new_guess = Candidate_Prediction
 		#####
 		return recentMove
 
