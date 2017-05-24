@@ -177,6 +177,11 @@ class NakedCandidateAlgorithm(Algorithm):
 		recentMove = movesStack.pop()
 		x = recentMove.x
 		y = recentMove.y
+		#####
+		#remove recent candidate from list
+		#self.num_map[x][y].remove(recentMove)
+		#new_guess = Candidate_Prediction
+		#####
 		return recentMove
 
 
@@ -201,7 +206,37 @@ class NakedCandidateAlgorithm(Algorithm):
 				i = i + 1
 			digit  = digit + 1
 		return True
-
+	
+	#this is made with assumption that false candidate is removed in backtrack
+        #call method if two or more candidates are called 
+        def Candidate_Prediction(self):
+            	self.num_map[self.x][self.y].remove(self.ValueIn)
+            	candidate = self.num_map[self.x][self.y]
+            	guess_attempt_value = 0
+            	#compare values
+            	for i in len(candidates):
+                	if(guess_attempt_value < candidate_score[candidates[i]]):
+            	        	guess_attempt = candidate[i]
+            	if(guess_attempt != self.ValueIn):
+              		candidate_score[self.ValueIn] -= 100
+                candidate_score[guess_attempt] += 50
+            	return guess_attempt
+		
+		# row&col calculations
+            	row_sum = 0
+            	col_sum = 0
+            	grid_sum = 0
+            	#calculate sums
+            	for i in range(0,9):
+                	row_sum = row_sum + self.num_map[i][agent_location[self.y]]
+                	col_sum = col_sum + self.num_map[agent_location[self.x]][i]
+        
+            	if((agent_location[self.x] % 3 == 0) and (agent_location[self.y] % 3 == 0)):
+			val_x = int(self.x / 3)
+			val_y = int(self.y / 3)
+                	for i in range(0,3):
+                    		for j in range(0,3):
+                        		grid_sum = grid_sum + self.num_map[i+3*val_x][j+3*val_y][(i+1)*(j+1) - 1]
 	# Learning + Backtracking will replace this
 	#from http://www.sudoku-solutions.com/index.php?page=solvingInteractions
 	#implement pointing pairs techinques
