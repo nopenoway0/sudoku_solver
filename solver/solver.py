@@ -21,6 +21,7 @@ agent = sc.SAgent(sc.NakedCandidateAlgorithm(puzzle))
 env = sc.SEnvironment(agent, puzzle)
 percentage = 0
 puzzles_solved = 0
+candidate_score = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 start = time.time()
 
 #need to add loop to call backtrack then bens algo again.
