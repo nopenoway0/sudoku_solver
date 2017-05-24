@@ -210,6 +210,7 @@ class NakedCandidateAlgorithm(Algorithm):
 	#this is made with assumption that false candidate is removed in backtrack
         #call method if two or more candidates are called 
         def Candidate_Prediction(self):
+		self.num_map[x][y].remove(recentMove)
         	candidate = self.num_map[x][y]
         	guess_attempt_value = 0
         	#compare values
